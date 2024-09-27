@@ -1,0 +1,23 @@
+{
+  "name": "job-portal",
+  "version": "1.0.0",
+  "description": "Helpful web application for job seekers and givers",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "author": "Narasimha S",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "env": "^0.0.2",
+    "express": "^4.21.0",
+    "jwt-service": "^10.1.1",
+    "module": "^1.2.5",
+    "mongoose": "^8.6.4",
+    "nodemon": "^3.1.7",
+    "validator": "^13.12.0"
+  }
+}
