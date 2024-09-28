@@ -10,7 +10,7 @@ const userSchema = new Schema({
     email:{
         type:String,
         required:[true , 'Email is Required'] ,
-        validate:[validator , 'Not a valid emailid'] 
+        
     },
     password:{
         type:String,
@@ -24,10 +24,14 @@ const userSchema = new Schema({
     {timestamps :true }
 );
 
-
 userSchema.pre('save' , async function(){
     const salt = await bcrypt.genSaltSync(10) ;
     this.password = await bcrypt.hash(this.password , salt ) ;
 });
+userSchema.methods.comparePassword = async function(userPassword) {
+    const isMatch = await bcrypt.compare(userPassword, this.password);
+    return isMatch;
+};
+
 
 export default mongoose.model('User' , userSchema)  ;

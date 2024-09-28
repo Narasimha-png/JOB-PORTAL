@@ -4,8 +4,11 @@ import dotenv from 'dotenv' ;
 import initJWTService from 'jwt-service' ;
 
 //file imports
-//import userRouter from './routes/registerRoute.js' ;
 import connectDB from './config/db.js';
+import { auth } from './middlewares/authentication.js';
+
+import userRouter from './routes/userRoute.js' ;
+
 //to load environmental variables
 dotenv.config() ;
 
@@ -18,8 +21,11 @@ app.use(express.json()) ;
 
 connectDB() ;
 
-//app.use('/api/v1' , userRouter ) ;
+app.use('/api/v1' , userRouter ) ;
 
+app.get('/test' , auth , (req , res )=>{
+    res.send("OKOK") ;
+})
 
 const PORT = process.env.PORT || 8400 ;
 app.listen( PORT , (err)=>{
