@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Push Notification</title>
+</head>
+<body>
+    <h1>Firebase Push Notification</h1>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-eO1E_oIVSVSuoHJGpiBkOlxdVccfVfU",
+            authDomain: "portfolio-aee99.firebaseapp.com",
+            projectId: "portfolio-aee99",
+            storageBucket: "portfolio-aee99.appspot.com",
+            messagingSenderId: "175332785816",
+            appId: "1:175332785816:web:3fb968159905e0be5a5aed",
+            measurementId: "G-DE73LEWJ5C"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        // Function to request permission and retrieve the FCM token
+        function requestNotificationPermission() {
+            return messaging.requestPermission()
+                .then(() => {
+                    console.log('Notification permission granted.');
+                    return messaging.getToken();
+                })
+                .catch((error) => {
+                    console.error('Error getting notification permission:', error);
+                });
+        }
+
+        // Function to handle token retrieval and sending to server
+        function handleToken(token) {
+            console.log('FCM Token:', token);
+
+            // Send the token to your server (example)
+            fetch('http://localhost:8001/sendnotification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token: token })
+            }).catch((error) => {
+                console.error('Error sending token to server:', error);
+            });
+        }
+
+        // Register the service worker
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('firebase-messaging-sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                        messaging.useServiceWorker(registration);
+
+                        // Request permission and get the token after successful registration
+                        return requestNotificationPermission();
+                    })
+                    .then((token) => {
+                        if (token) {
+                            handleToken(token);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            }
+        }
+
+        // Start the process
+        registerServiceWorker();
+    </script>
+</body>
+</html>
