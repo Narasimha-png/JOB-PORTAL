@@ -12,6 +12,7 @@ import { notify, notifyall } from './controllers/notifyController.js';
 //routers
 import userRouter from './routes/userRoute.js' ;
 import jobRouter from './routes/jobRouter.js';
+import postRouter from './routes/postMessage.js';
 //to load environmental variables
 dotenv.config() ;
 
@@ -23,6 +24,7 @@ app.use(cookieParser()) ;
 app.use(cors()) ;
 
 connectDB() ;
+app.use('/ananimous' , postRouter) ;
 app.use('/api/v1' , userRouter ) ;
 
 app.use('/api/post', auth ,jobRouter ) ;
