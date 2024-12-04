@@ -2,3 +2,5 @@ node_modules/
 .env
 
 config/serviceAccountKey.json
+firebase-messaging-sw.js   
+public/firebase-messaging-sw.js
