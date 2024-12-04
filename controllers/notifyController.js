@@ -14,13 +14,11 @@ export const notify = async (token, res) => {
                 token,
                 "Already Subscribed",
                 "Thank You For Subscribing Again",
-                "https://www.google.com/"
+                "http://127.0.0.1:5500/public/notify.html"
             );
 
             return res.status(208).send('Already Reported');
         }
-
-        // If not subscribed, add the user and send the notification
         await Notify.create({ token });
         await sendPushNotification(
             token,

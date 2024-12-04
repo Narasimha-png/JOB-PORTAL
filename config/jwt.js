@@ -3,7 +3,7 @@ export const genToken = async( id ) =>{
     const secretKey = process.env.JWT_SECURITY_KEY ;
     const days = 30 ;
     const token = await jwt.sign({_id:id } ,
-        secretKey , { expiresIn :`${days}d`} 
+        secretKey , { expiresIn :`${days}d` } 
     )
     return token ;
 } 

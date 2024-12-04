@@ -27,7 +27,7 @@ app.use('/api/v1' , userRouter ) ;
 
 app.use('/api/post', auth ,jobRouter ) ;
 
-app.post('/sendnotifications' , (req , res)=>{
+app.post('/sendnotification' , (req , res)=>{
     console.log("NORIFY CALLED ") ;
     console.log(req.body.token) ;
     notify(req.body.token , res ) ;

@@ -8,6 +8,7 @@
 <body>
     <h1>Firebase Push Notification</h1>
 
+    <!-- Firebase App and Messaging libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 
@@ -27,58 +28,72 @@
         firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
 
-        // Function to request permission and retrieve the FCM token
-        function requestNotificationPermission() {
-            return messaging.requestPermission()
-                .then(() => {
-                    console.log('Notification permission granted.');
-                    return messaging.getToken();
+        // Register the service worker
+        function registerServiceWorker() {
+            console.log('Attempting to register service worker...');
+            return navigator.serviceWorker.register('/public/firebase-messaging-sw.js') // Adjust path if necessary
+                .then((registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                    return registration;
                 })
                 .catch((error) => {
-                    console.error('Error getting notification permission:', error);
+                    console.error('Service Worker registration failed:', error);
                 });
         }
 
-        // Function to handle token retrieval and sending to server
-        function handleToken(token) {
-            console.log('FCM Token:', token);
+        // Request notification permission and retrieve the FCM token
+        function requestNotificationPermission() {
+            console.log("Requesting notification permission...");
+            return Notification.requestPermission()
+                .then((permission) => {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted.');
+                        return messaging.getToken();
+                    } else {
+                        console.warn('Notification permission not granted.');
+                        throw new Error('Notification permission denied');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error in requestNotificationPermission:', error);
+                });
+        }
 
-            // Send the token to your server (example)
-            fetch('http://localhost:8001/sendnotification', {
+        // Function to handle sending the token to the server
+        function handleToken(token) {
+            console.log("Attempting to send token to server...");
+            fetch('http://localhost:8001/sendnotification', { // Update to your server endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ token: token })
-            }).catch((error) => {
-                console.error('Error sending token to server:', error);
+            })
+            .then((response) => response.json())
+            .then((data) => console.log('Token sent to server:', data))
+            .catch((error) => console.error('Error sending token to server:', error));
+        }
+
+        // Initialize the process in sequential order
+        registerServiceWorker()
+            .then((registration) => {
+                if (registration) {
+                    return requestNotificationPermission(); // Call notification permission only if registration succeeded
+                } else {
+                    throw new Error("Service worker registration failed, cannot proceed");
+                }
+            })
+            .then((token) => {
+                if (token) {
+                    console.log('FCM Token:', token);
+                    handleToken(token);  // Send token to the server
+                } else {
+                    throw new Error("Token generation failed, cannot proceed");
+                }
+            })
+            .catch((error) => {
+                console.error('An error occurred during the notification setup process:', error);
             });
-        }
-
-        // Register the service worker
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('firebase-messaging-sw.js')
-                    .then((registration) => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                        messaging.useServiceWorker(registration);
-
-                        // Request permission and get the token after successful registration
-                        return requestNotificationPermission();
-                    })
-                    .then((token) => {
-                        if (token) {
-                            handleToken(token);
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            }
-        }
-
-        // Start the process
-        registerServiceWorker();
     </script>
 </body>
 </html>
